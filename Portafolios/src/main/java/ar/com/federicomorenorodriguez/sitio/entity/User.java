@@ -13,6 +13,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -30,21 +32,28 @@ public class User implements Serializable {
 	private Long id;
 
 	@Column
+	@NotBlank
 	private String firstName;
 
 	@Column
+	@NotBlank
 	private String lastName;
 
 	@Column
+	@NotBlank
+	@Email(message = "Email should be valid")
 	private String email;
 
 	@Column
+	@NotBlank
 	private String username;
 
 	@Column
+	@NotBlank
 	private String password;
 
 	@Transient
+	@NotBlank
 	private String confirmPassword;
 
 	@ManyToMany(fetch = FetchType.LAZY)
