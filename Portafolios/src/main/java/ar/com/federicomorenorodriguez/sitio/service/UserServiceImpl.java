@@ -28,11 +28,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private boolean checkPasswordValid(User user) throws Exception {
-		
-		if(user.getConfirmPassword() == null || user.getConfirmPassword().isEmpty()) {
+
+		if (user.getConfirmPassword() == null || user.getConfirmPassword().isEmpty()) {
 			throw new Exception("Confirm password es obligatorio");
 		}
-		
+
 		if (!user.getPassword().equals(user.getConfirmPassword())) {
 			throw new Exception("Password doesn't match.");
 		}
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getUserById(Long id) throws Exception {
 
-		return userRepository.findById(id).orElseThrow(() -> new Exception("El usuario para editar no existe"));
+		return userRepository.findById(id).orElseThrow(() -> new Exception("El usuario no existe"));
 	}
 
 	@Override
@@ -59,9 +59,10 @@ public class UserServiceImpl implements UserService {
 		mapUser(fromUser, toUser);
 		return userRepository.save(toUser);
 	}
-	
+
 	/**
 	 * Map everything but the password
+	 * 
 	 * @param from
 	 * @param to
 	 */
@@ -71,5 +72,13 @@ public class UserServiceImpl implements UserService {
 		to.setLastName(from.getLastName());
 		to.setEmail(from.getEmail());
 		to.setRoles(from.getRoles());
+	}
+
+	@Override
+	public void deleteUser(Long id) throws Exception {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new Exception("User not Found in deleteUser -" + this.getClass().getName()));
+
+		userRepository.delete(user);
 	}
 }
