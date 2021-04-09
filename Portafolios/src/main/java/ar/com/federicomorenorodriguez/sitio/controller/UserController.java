@@ -1,17 +1,23 @@
 package ar.com.federicomorenorodriguez.sitio.controller;
 
+import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import ar.com.federicomorenorodriguez.sitio.dto.ChangePasswordForm;
 import ar.com.federicomorenorodriguez.sitio.entity.User;
 import ar.com.federicomorenorodriguez.sitio.repository.RoleRepository;
 import ar.com.federicomorenorodriguez.sitio.repository.UserRepository;
@@ -74,6 +80,7 @@ public class UserController {
 		model.addAttribute("userList", userService.getAllUsers());
 		model.addAttribute("formTab", "active");
 		model.addAttribute("editMode", "true");
+		model.addAttribute("passwordForm", new ChangePasswordForm(id));
 		return "user-form/user-view";
 	}
 
@@ -83,6 +90,7 @@ public class UserController {
 			model.addAttribute("userForm", user);
 			model.addAttribute("formTab", "active");
 			model.addAttribute("editMode", "true");
+			model.addAttribute("passwordForm", new ChangePasswordForm(user.getId()));
 		} else {
 			try {
 				userService.updateUser(user);
@@ -95,6 +103,7 @@ public class UserController {
 				model.addAttribute("userList", userService.getAllUsers());
 				model.addAttribute("roles", roleRepository.findAll());
 				model.addAttribute("editMode", "true");
+				model.addAttribute("passwordForm", new ChangePasswordForm(user.getId()));
 			}
 		}
 		model.addAttribute("userList", userService.getAllUsers());
@@ -116,6 +125,24 @@ public class UserController {
 		}
 
 		return getUserForm(model);
+	}
+
+	@PostMapping("/editUser/changePassword")
+	public ResponseEntity<String> postEditUseChangePassword(@Valid @RequestBody ChangePasswordForm form, Errors errors) {
+
+		try {
+			// If error, just return a 400 bad request, along with the error message
+			if (errors.hasErrors()) {
+				String result = errors.getAllErrors().stream().map(x -> x.getDefaultMessage())
+						.collect(Collectors.joining(""));
+
+				throw new Exception(result);
+			}
+			userService.changePassword(form);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+		return ResponseEntity.ok("success");
 	}
 
 }

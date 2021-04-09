@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ar.com.federicomorenorodriguez.sitio.dto.ChangePasswordForm;
 import ar.com.federicomorenorodriguez.sitio.entity.User;
 import ar.com.federicomorenorodriguez.sitio.repository.UserRepository;
 
@@ -80,5 +81,26 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(() -> new Exception("User not Found in deleteUser -" + this.getClass().getName()));
 
 		userRepository.delete(user);
+	}
+
+	@Override
+	public User changePassword(ChangePasswordForm form) throws Exception {
+		User storedUser = userRepository.findById(form.getId())
+				.orElseThrow(() -> new Exception("User not Found in ChangePassword -" + this.getClass().getName()));
+
+		if (!storedUser.getPassword().equals(form.getCurrentPassword())) {
+			throw new Exception("Current Password Incorrect.");
+		}
+
+		if (storedUser.getPassword().equals(form.getNewPassword())) {
+			throw new Exception("New Password must be different than Current Password!");
+		}
+
+		if (!form.getNewPassword().equals(form.getConfirmPassword())) {
+			throw new Exception("New Password and Confirm Password does not match!");
+		}
+
+		storedUser.setPassword(form.getNewPassword());
+		return userRepository.save(storedUser);
 	}
 }
