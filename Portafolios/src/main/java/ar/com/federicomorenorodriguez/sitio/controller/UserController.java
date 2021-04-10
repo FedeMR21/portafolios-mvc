@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import ar.com.federicomorenorodriguez.sitio.Exception.CustomeFieldValidationException;
 import ar.com.federicomorenorodriguez.sitio.Exception.UsernameOrIdNotFound;
 import ar.com.federicomorenorodriguez.sitio.dto.ChangePasswordForm;
 import ar.com.federicomorenorodriguez.sitio.entity.User;
@@ -60,6 +61,12 @@ public class UserController {
 				userService.createUser(user);
 				model.addAttribute("userForm", new User());
 				model.addAttribute("listTab", "active");
+			} catch (CustomeFieldValidationException e) {
+				result.rejectValue(e.getFieldName(), null, e.getMessage());
+				model.addAttribute("userForm", user);
+				model.addAttribute("formTab", "active");
+				model.addAttribute("userList", userService.getAllUsers());
+				model.addAttribute("roles", roleRepository.findAll());
 			} catch (Exception e) {
 				model.addAttribute("formErrorMessage", e.getMessage());
 				model.addAttribute("userForm", user);
@@ -129,7 +136,8 @@ public class UserController {
 	}
 
 	@PostMapping("/editUser/changePassword")
-	public ResponseEntity<String> postEditUseChangePassword(@Valid @RequestBody ChangePasswordForm form, Errors errors) {
+	public ResponseEntity<String> postEditUseChangePassword(@Valid @RequestBody ChangePasswordForm form,
+			Errors errors) {
 
 		try {
 			// If error, just return a 400 bad request, along with the error message
